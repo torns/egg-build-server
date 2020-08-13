@@ -1,7 +1,10 @@
 # test.yml
-version: 1.0.0
+version: 1.0
 
 property:
   server: consoles.guangdianyun.tv
   port: 80
 
+configuration:
+  imagename: gdy
+  tag: 1.0.1

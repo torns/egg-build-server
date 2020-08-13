@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-12 19:28:18
+ * @LastEditTime: 2020-08-13 17:37:28
  * @Description: file content
  */
 
@@ -49,15 +49,11 @@ class WebhookService extends Service {
         path: 'http://gitlab.aodianyun.com/common/gitlab-webhook-test',
         secret: '1d9f84d2bf0a3e759dd2995d1791168a',
         events: ['Push Hook'],
-        project: 'test',
-        dir: '/test',
       },
       {
         path: 'http://www.test.com/test',
         secret: '1d9f84d2bf0a3e759dd2995d1791168a',
         events: ['Push Hook'],
-        project: 'test',
-        dir: '/test',
       },
     ]
 
@@ -104,8 +100,6 @@ class WebhookService extends Service {
     if (events && events.indexOf(event) === -1) {
       return ctx.returnCtxBody(400, {}, 'X-Gitlab-Event is not acceptable')
     }
-
-    console.log(currentOptions.project, currentOptions.dir)
 
     const { body } = ctx.request
 

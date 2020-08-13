@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-13 16:26:38
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-13 16:45:24
+ * @LastEditTime: 2020-08-13 18:56:00
  * @Description: file content
  */
 
@@ -11,7 +11,7 @@
 const Controller = require('egg').Controller
 
 class ProjectController extends Controller {
-  async index() {
+  async create() {
     const { ctx, service } = this
 
     const rule = { name: { type: 'string', required: true } }
@@ -31,6 +31,26 @@ class ProjectController extends Controller {
     if (!res) {
       return ctx.returnCtxBody(403, {}, 'failed')
     }
+
+    return ctx.returnCtxBody(200, {}, 'success')
+  }
+
+  async pack() {
+    const { ctx, service } = this
+
+    const rule = { name: { type: 'string', required: true } }
+
+    try {
+      ctx.validate(rule, ctx.request.body)
+    } catch (err) {
+      ctx.logger.warn(err.errors)
+      ctx.returnCtxBody(400, {}, 'illegal parameters')
+      return
+    }
+
+    const { name } = ctx.request.body
+
+    service.project.packProject(name)
 
     return ctx.returnCtxBody(200, {}, 'success')
   }

@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-12 09:05:40
+ * @LastEditTime: 2020-08-12 19:28:18
  * @Description: file content
  */
 
@@ -123,18 +123,17 @@ class WebhookService extends Service {
     const { ctx } = this
 
     try {
-      const dirPath = path.join(__dirname, '../public/temp')
+      const dirPath = path.resolve(__dirname, '../public/temp')
+      console.log(dirPath)
       if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath)
-        console.log('文件夹创建成功')
-      } else {
-        console.warn('文件夹已存在')
+        console.log('temp 创建成功')
       }
 
       const filePath = `${url}/repository/archive.zip?ref=master`
       const fileName = `${name}.zip`
 
-      const stream = fs.createWriteStream(path.join(dirPath, fileName))
+      const stream = fs.createWriteStream(path.resolve(dirPath, fileName))
 
       request(filePath, err => {
         if (err) {
@@ -153,8 +152,8 @@ class WebhookService extends Service {
 
   async unCompress(from) {
     await compressing.zip.uncompress(
-      path.join(__dirname, `../public/temp/${from}`),
-      path.join(__dirname, '../public/temp')
+      path.resolve(__dirname, `../public/temp/${from}`),
+      path.resolve(__dirname, '../public/temp')
     )
   }
 }

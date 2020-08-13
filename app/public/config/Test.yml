@@ -1,0 +1,7 @@
+# test.yml
+version: 1.0.0
+
+property:
+  server: consoles.guangdianyun.tv
+  port: 80
+

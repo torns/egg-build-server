@@ -1,0 +1,12 @@
+# build.yml
+version: 0.1
+
+config:
+  spa: true
+  ssr: false
+  folder: dist
+  server: /consoles\.guangdianyun\.tv/
+
+target:
+  project: G-UI
+  location: test

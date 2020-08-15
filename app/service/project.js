@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-13 10:18:42
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-13 19:40:15
+ * @LastEditTime: 2020-08-14 10:11:21
  * @Description: file content
  */
 
@@ -24,6 +24,11 @@ function run(cmd, args, fn) {
     stdio: 'inherit',
   })
 
+  runner.on('error', err => {
+    console.log('Failed to start child process')
+    throw new Error(err)
+  })
+
   runner.on('close', code => {
     if (fn) {
       fn(code)
@@ -38,17 +43,17 @@ class ProjectService extends Service {
     const filePath = `${configPath}/${name}.yml`
     const targetPath = path.resolve(__dirname, `../public/workspace/${name}`)
 
-    if (!fs.existsSync(filePath)) {
-      console.log('项目配置文件不存在')
-      return false
-    }
-
-    if (!fs.existsSync(targetPath)) {
-      fs.mkdirSync(targetPath)
-      fs.mkdirSync(`${targetPath}/app`)
-    }
-
     try {
+      if (!fs.existsSync(filePath)) {
+        console.log('项目配置文件不存在')
+        return false
+      }
+
+      if (!fs.existsSync(targetPath)) {
+        fs.mkdirSync(targetPath)
+        fs.mkdirSync(`${targetPath}/app`)
+      }
+
       const data = YAML.parse(fs.readFileSync(filePath).toString())
       const { server, port } = data.property
       const files = fs.readdirSync(originalPath)
@@ -66,8 +71,7 @@ class ProjectService extends Service {
         config.stringify().replace('your_website_server_name', server)
       )
     } catch (err) {
-      console.log(err)
-      return false
+      throw new Error(err)
     }
 
     return true
@@ -77,29 +81,49 @@ class ProjectService extends Service {
     const filePath = path.resolve(__dirname, `../public/config/${name}.yml`)
     const projectPath = path.resolve(__dirname, `../public/workspace/${name}`)
 
-    if (!fs.existsSync(filePath)) {
-      console.log('项目配置文件不存在')
-      return false
-    }
-
-    if (!fs.existsSync(projectPath)) {
-      console.log('项目不存在')
-      return false
-    }
-
-    const data = YAML.parse(fs.readFileSync(filePath).toString())
-    const { imagename, tag } = data.configuration
-
-    process.chdir(projectPath)
-
-    run(
-      'docker',
-      ['image', 'build', '-f', 'Dockerfile', '-t', `${imagename}:${tag}`, '.'],
-      () => {
-        console.log('docker pack complete')
-        return true
+    try {
+      if (!fs.existsSync(filePath)) {
+        console.log('项目配置文件不存在')
+        return false
       }
-    )
+
+      if (!fs.existsSync(projectPath)) {
+        console.log('项目不存在')
+        return false
+      }
+
+      const data = YAML.parse(fs.readFileSync(filePath).toString())
+      const { imagename, tag } = data.configuration
+
+      process.chdir(projectPath)
+
+      run(
+        'docker',
+        [
+          'image',
+          'build',
+          '-f',
+          'Dockerfile',
+          '-t',
+          `${imagename}:${tag}`,
+          '.',
+        ],
+        () => {
+          // childProcess.spawn(
+          //   'docker',
+          //   ['save', '-o', `${imagename}.tar`, `${imagename}:${tag}`],
+          //   {
+          //     detached: true,
+          //     stdio: 'inherit',
+          //   }
+          // )
+          console.log('docker pack complete')
+          return true
+        }
+      )
+    } catch (err) {
+      throw new Error(err)
+    }
   }
 }
 

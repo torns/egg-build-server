@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 11:35:45
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-10 19:47:54
+ * @LastEditTime: 2020-08-15 18:28:50
  * @Description: file content
  */
 
@@ -21,5 +21,13 @@ module.exports = {
   snowflake: {
     enable: true,
     package: 'egg-snowflake',
+  },
+  amqplib: {
+    enable: true,
+    package: 'egg-amqplib',
+  },
+  redis: {
+    enable: true,
+    package: 'egg-redis',
   },
 }

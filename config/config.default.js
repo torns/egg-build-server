@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 11:35:45
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-10 19:09:28
+ * @LastEditTime: 2020-08-15 18:44:00
  * @Description: file content
  */
 /* eslint valid-jsdoc: "off" */
@@ -50,6 +50,37 @@ module.exports = appInfo => {
         machineIdBitLength: 6,
         workerIdBitLength: 4,
         serialIdBitLength: 8,
+      },
+    },
+    redis: {
+      client: {
+        port: 6379,
+        host: '127.0.0.1',
+        password: 'whz18267590821',
+        db: 0,
+        weakDependent: true,
+      },
+    },
+    amqplib: {
+      client: {
+        // url: 'amqp://localhost',
+        connectOptions: {
+          protocol: 'amqp',
+          hostname: 'localhost',
+          port: 5672,
+          username: 'guest',
+          password: 'guest',
+          locale: 'en_US',
+          frameMax: 0,
+          heartbeat: 0,
+          vhost: '/',
+        },
+        // socketOptions: {
+        //   cert: certificateAsBuffer, // client cert
+        //   key: privateKeyAsBuffer, // client key
+        //   passphrase: 'MySecretPassword', // passphrase for key
+        //   ca: [caCertAsBuffer], // array of trusted CA certs
+        // },
       },
     },
   }

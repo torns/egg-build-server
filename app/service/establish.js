@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-12 19:39:07
+ * @LastEditTime: 2020-08-16 01:41:20
  * @Description: file content
  */
 
@@ -23,6 +23,11 @@ function run(cmd, args, fn) {
     stdio: 'inherit',
   })
 
+  runner.on('error', err => {
+    console.log('Failed to start child process')
+    throw new Error(err)
+  })
+
   runner.on('close', code => {
     if (fn) {
       fn(code)
@@ -32,72 +37,95 @@ function run(cmd, args, fn) {
 
 class EstablishService extends Service {
   async build(name, path) {
-    const { ctx } = this
+    return new Promise((resolve, reject) => {
+      const { ctx } = this
+      // const ignoreList = ['.zip', '.DS_Store']
 
-    // const ignoreList = ['.zip', '.DS_Store']
-    const npm = ctx.find()
-    const paths = fs.readdirSync(path)
-    console.log(paths)
+      try {
+        const npm = ctx.find()
+        const paths = fs.readdirSync(path)
+        console.log(paths)
 
-    paths.forEach(item => {
-      if (!item.includes(name)) return
-      if (item.includes('.zip')) return
+        paths.forEach(item => {
+          if (!item.includes(name)) return
+          if (item.includes('.zip')) return
 
-      process.chdir(`${path}/${item}`)
-      // TODO 异常处理
-      run(which.sync(npm), ['install'], () => {
-        console.log('install complete')
-        if (npm === 'yarn') {
-          run(which.sync(npm), ['build'], () => {
-            console.log('build complete')
-            this.afterBuild(`${path}/${item}`) // 当前 path 为 temp/...
+          process.chdir(`${path}/${item}`)
+          run(which.sync(npm), ['install'], () => {
+            console.log('install complete')
+            if (npm === 'yarn') {
+              run(which.sync(npm), ['build'], async () => {
+                console.log('build complete')
+                await this.afterBuild(`${path}/${item}`) // 当前 path 为 temp/...
+                resolve('ok')
+              })
+            } else {
+              run(which.sync(npm), ['run', 'build'], async () => {
+                console.log('build complete')
+                await this.afterBuild(`${path}/${item}`) // 当前 path 为 temp/...
+                resolve('ok')
+              })
+            }
           })
-        } else {
-          run(which.sync(npm), ['run', 'build'], () => {
-            console.log('build complete')
-            this.afterBuild(`${path}/${item}`) // 当前 path 为 temp/...
-          })
-        }
-      })
+        })
+      } catch (err) {
+        console.error(`应用构建异常：${err}，请重新获取`)
+        this.clearTemp()
+          .then(() => reject(new Error(err)))
+          .catch(e => reject(new Error(`${err} & ${e}`)))
+        // throw new Error(err)
+      }
     })
   }
 
   async afterBuild(path) {
     const { ctx } = this
 
-    const yamlData = await ctx.service.deploy.index(path)
-    console.log(yamlData)
-    console.log(path)
+    await ctx.service.deploy.index(path)
 
-    console.log('yaml parse complete')
-
-    this.clearTemp()
+    await this.clearTemp()
+    return
   }
 
-  async remove(path) {
-    if (fs.existsSync(path)) {
-      const files = fs.readdirSync(path)
-      files.forEach(file => {
-        const curPath = `${path}/${file}`
-        if (fs.statSync(curPath).isDirectory()) {
-          // recurse
-          this.remove(curPath)
-        } else {
-          // delete file
-          fs.unlinkSync(curPath)
-        }
-      })
-      fs.rmdirSync(path)
-    }
-  }
+  // async remove(path) {
+  //   // 遍历移除文件和文件夹
+  //   try {
+  //     if (fs.existsSync(path)) {
+  //       const files = fs.readdirSync(path)
+  //       files.forEach(file => {
+  //         const curPath = `${path}/${file}`
+  //         if (fs.statSync(curPath).isDirectory()) {
+  //           // recurse
+  //           this.remove(curPath)
+  //         } else {
+  //           // delete file
+  //           fs.unlinkSync(curPath)
+  //         }
+  //       })
+  //       fs.rmdirSync(path)
+  //     }
+  //   } catch (err) {
+  //     throw new Error(err)
+  //   }
+  // }
 
   async clearTemp() {
-    const finalPath = path.resolve(__dirname, '../public')
-    console.log(finalPath)
-    process.chdir(finalPath)
-    run('rm', ['-r', '-f', 'temp'], () => {
-      console.log('clear complete')
-      fs.mkdirSync(`${finalPath}/temp`)
+    // 使用系统 rm 命令移除 temp 文件夹
+    return new Promise((resolve, reject) => {
+      const finalPath = path.resolve(__dirname, '../public')
+
+      try {
+        process.chdir(finalPath)
+        run('rm', ['-r', '-f', 'temp'], () => {
+          console.log('clear temp area complete')
+          fs.mkdirSync(`${finalPath}/temp`)
+          console.log('rebuild temp area complete')
+          resolve('ok')
+        })
+      } catch (err) {
+        console.error(err)
+        reject(err)
+      }
     })
   }
 }

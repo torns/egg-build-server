@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-13 17:37:28
+ * @LastEditTime: 2020-08-16 01:41:37
  * @Description: file content
  */
 
@@ -102,53 +102,67 @@ class WebhookService extends Service {
     }
 
     const { body } = ctx.request
-
     console.log(body)
+    ctx.returnCtxBody(200, { ok: true }, 'success')
 
-    await this.getSource(
-      body.repository.name,
-      body.repository.git_http_url.split('.git')[0]
-    )
+    await this.getSource(body)
 
-    return ctx.returnCtxBody(200, { ok: true }, 'success')
+    return
   }
 
-  async getSource(name, url) {
-    const { ctx } = this
+  async getSource(info) {
+    return new Promise((resolve, reject) => {
+      const { ctx } = this
 
-    try {
-      const dirPath = path.resolve(__dirname, '../public/temp')
-      console.log(dirPath)
-      if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath)
-        console.log('temp 创建成功')
-      }
+      const name = info.repository.name
+      const url = info.repository.git_http_url.split('.git')[0]
 
-      const filePath = `${url}/repository/archive.zip?ref=master`
-      const fileName = `${name}.zip`
-
-      const stream = fs.createWriteStream(path.resolve(dirPath, fileName))
-
-      request(filePath, err => {
-        if (err) {
-          throw new Error(err)
+      try {
+        const dirPath = path.resolve(__dirname, '../public/temp')
+        console.log(dirPath)
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath)
+          console.log('temp 创建成功')
         }
-      })
-        .pipe(stream)
-        .on('close', async () => {
-          await this.unCompress(fileName)
-          await ctx.service.establish.build(name, dirPath)
+
+        const filePath = `${url}/repository/archive.zip?ref=master`
+        const fileName = `${name}.zip`
+
+        const stream = fs.createWriteStream(path.resolve(dirPath, fileName))
+
+        request(filePath, err => {
+          if (err) {
+            // throw new Error(err)
+            reject(new Error(err))
+          }
         })
-    } catch (err) {
-      throw new Error(err)
-    }
+          .pipe(stream)
+          .on('close', async () => {
+            await this.unCompress(fileName)
+            await ctx.service.establish.build(name, dirPath)
+            resolve('ok')
+          })
+      } catch (err) {
+        console.error(`资源获取异常：${err}，请重新获取`)
+        // TODO 修改为异步
+        ctx.service.establish
+          .clearTemp()
+          .then(() => reject(new Error(err)))
+          .catch(e => reject(new Error(`${err} & ${e}`)))
+        // throw new Error(err)
+      }
+    })
   }
 
   async unCompress(from) {
-    await compressing.zip.uncompress(
-      path.resolve(__dirname, `../public/temp/${from}`),
-      path.resolve(__dirname, '../public/temp')
-    )
+    try {
+      await compressing.zip.uncompress(
+        path.resolve(__dirname, `../public/temp/${from}`),
+        path.resolve(__dirname, '../public/temp')
+      )
+    } catch (err) {
+      throw new Error(err)
+    }
   }
 }
 

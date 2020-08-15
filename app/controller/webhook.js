@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 18:40:49
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-16 02:02:15
+ * @LastEditTime: 2020-08-16 02:30:03
  * @Description: file content
  */
 
@@ -83,8 +83,9 @@ class WebhookController extends Controller {
     taskList.push(info)
     console.log(`加入新任务，当前任务队列长度：${taskList.length}`)
     await app.redis.set(QUEUE_NAME, JSON.stringify(taskList))
+    await app.redis.persist(QUEUE_NAME)
 
-    !this.getTaskLockStatus() && this.runTask()
+    !(await this.getTaskLockStatus()) && this.runTask()
 
     ctx.returnCtxBody(200, {}, 'success')
     return
@@ -109,8 +110,9 @@ class WebhookController extends Controller {
         // TODO 多次失败的处理
         throw new Error(err)
       }
-      console.log(`消费任务，当前任务队列长度：${taskList.length}`)
+      console.log(`已消费任务，当前任务队列长度：${taskList.length}`)
       await app.redis.set(QUEUE_NAME, JSON.stringify(taskList))
+      await app.redis.persist(QUEUE_NAME)
 
       if (taskList.length > 0) return this.runTask()
     }
@@ -122,9 +124,14 @@ class WebhookController extends Controller {
   async getTaskLockStatus() {
     const { app } = this
 
-    const status = await app.redis.get(TASK_LOCK)
-
-    return status === 1
+    try {
+      const status = await app.redis.get(TASK_LOCK)
+      return status === 'true'
+    } catch (err) {
+      await app.redis.set(TASK_LOCK, 'false')
+      await app.redis.persist(TASK_LOCK)
+      return false
+    }
   }
 
   async changeTaskLockStatus(status = true) {
@@ -135,7 +142,9 @@ class WebhookController extends Controller {
       throw new TypeError('无效的锁状态')
     }
 
-    return await app.redis.get(TASK_LOCK, status ? 1 : 0)
+    await app.redis.set(TASK_LOCK, status ? 'true' : 'false')
+    await app.redis.persist(TASK_LOCK)
+    return
   }
 
   async task() {

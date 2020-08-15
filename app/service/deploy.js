@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-14 09:54:49
+ * @LastEditTime: 2020-08-16 02:32:30
  * @Description: file content
  */
 
@@ -50,12 +50,13 @@ class DeployService extends Service {
     //   fs.copyFileSync(NGINX_LOCATION, `${projectPath}/nginx.conf`)
     //   console.log('项目创建成功')
     // }
-    try {
-      if (!fs.existsSync(`${projectPath}/app/${location}`)) {
-        fs.mkdirSync(`${projectPath}/app/${location}`)
-        console.log('子项目创建成功')
-      }
 
+    if (!fs.existsSync(`${projectPath}/app/${location}`)) {
+      fs.mkdirSync(`${projectPath}/app/${location}`)
+      console.log('子项目创建成功')
+    }
+
+    try {
       fs.renameSync(
         `${filePath}/${folder}`,
         path.resolve(
@@ -64,6 +65,8 @@ class DeployService extends Service {
         )
       )
     } catch (err) {
+      // TODO 完善已存在的情况
+      console.log('目标子项目已存在，将被覆盖')
       throw new Error(err)
     }
 

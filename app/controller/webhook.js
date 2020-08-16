@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 18:40:49
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-16 02:30:03
+ * @LastEditTime: 2020-08-16 19:36:58
  * @Description: file content
  */
 
@@ -66,14 +66,6 @@ class WebhookController extends Controller {
     const { ctx, app } = this
 
     let taskList = []
-
-    // Publisher
-    // const msg = JSON.stringify(info)
-    // const ch = await app.amqplib.createChannel()
-    // await ch.assertQueue(queueName, { durable: true })
-    // const ok = await ch.sendToQueue(queueName, Buffer.from(msg))
-    // console.log(ok)
-    // await ch.close()
 
     const res = await app.redis.get(QUEUE_NAME)
 

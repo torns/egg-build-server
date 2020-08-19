@@ -2,14 +2,11 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 18:40:49
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-16 19:36:58
+ * @LastEditTime: 2020-08-19 15:07:44
  * @Description: file content
  */
 
 'use strict'
-
-const QUEUE_NAME = 'task_list'
-const TASK_LOCK = 'task_lock'
 
 const handlers = [
   {
@@ -23,21 +20,6 @@ const handlers = [
     events: ['Push Hook'],
   },
 ]
-
-function isJSON(str) {
-  if (typeof str === 'string') {
-    try {
-      const obj = JSON.parse(str)
-      if (typeof obj === 'object' && obj) {
-        return true
-      }
-      return false
-    } catch (e) {
-      console.log('error：' + str + '!!!' + e)
-      return false
-    }
-  }
-}
 
 function findHandler(url, arr) {
   const res = arr.filter(item => item.path === url)
@@ -62,83 +44,6 @@ function checkType(options) {
 const Controller = require('egg').Controller
 
 class WebhookController extends Controller {
-  async addNewTask(info) {
-    const { ctx, app } = this
-
-    let taskList = []
-
-    const res = await app.redis.get(QUEUE_NAME)
-
-    if (res) {
-      taskList = isJSON(res) ? JSON.parse(res) : []
-    }
-    taskList.push(info)
-    console.log(`加入新任务，当前任务队列长度：${taskList.length}`)
-    await app.redis.set(QUEUE_NAME, JSON.stringify(taskList))
-    await app.redis.persist(QUEUE_NAME)
-
-    !(await this.getTaskLockStatus()) && this.runTask()
-
-    ctx.returnCtxBody(200, {}, 'success')
-    return
-  }
-
-  async runTask() {
-    const { app, service } = this
-
-    this.changeTaskLockStatus(true)
-    // Consumer
-    const res = await app.redis.get(QUEUE_NAME)
-    const taskList = isJSON(res) ? JSON.parse(res) : []
-
-    if (taskList.length > 0) {
-      const info = taskList.shift()
-      console.log(`当前任务：${info}`)
-      try {
-        if (info) {
-          await service.webhook.getSource(info)
-        }
-      } catch (err) {
-        // TODO 多次失败的处理
-        throw new Error(err)
-      }
-      console.log(`已消费任务，当前任务队列长度：${taskList.length}`)
-      await app.redis.set(QUEUE_NAME, JSON.stringify(taskList))
-      await app.redis.persist(QUEUE_NAME)
-
-      if (taskList.length > 0) return this.runTask()
-    }
-
-    this.changeTaskLockStatus(false)
-    return
-  }
-
-  async getTaskLockStatus() {
-    const { app } = this
-
-    try {
-      const status = await app.redis.get(TASK_LOCK)
-      return status === 'true'
-    } catch (err) {
-      await app.redis.set(TASK_LOCK, 'false')
-      await app.redis.persist(TASK_LOCK)
-      return false
-    }
-  }
-
-  async changeTaskLockStatus(status = true) {
-    const { app } = this
-
-    // const lockStatus = await app.redis.get(TASK_LOCK)
-    if (typeof status !== 'boolean') {
-      throw new TypeError('无效的锁状态')
-    }
-
-    await app.redis.set(TASK_LOCK, status ? 'true' : 'false')
-    await app.redis.persist(TASK_LOCK)
-    return
-  }
-
   async task() {
     const { ctx } = this
     const { req } = ctx

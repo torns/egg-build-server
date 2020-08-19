@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-16 01:41:20
+ * @LastEditTime: 2020-08-19 18:18:53
  * @Description: file content
  */
 
@@ -24,7 +24,7 @@ function run(cmd, args, fn) {
   })
 
   runner.on('error', err => {
-    console.log('Failed to start child process')
+    console.error('Failed to start child process')
     throw new Error(err)
   })
 
@@ -45,6 +45,7 @@ class EstablishService extends Service {
         const npm = ctx.find()
         const paths = fs.readdirSync(path)
         console.log(paths)
+        if (!paths.includes(name)) reject(new Error('未找到对应项目目录'))
 
         paths.forEach(item => {
           if (!item.includes(name)) return
@@ -53,6 +54,7 @@ class EstablishService extends Service {
           process.chdir(`${path}/${item}`)
           run(which.sync(npm), ['install'], () => {
             console.log('install complete')
+            // TODO 私有化构建
             if (npm === 'yarn') {
               run(which.sync(npm), ['build'], async () => {
                 console.log('build complete')
@@ -86,28 +88,6 @@ class EstablishService extends Service {
     await this.clearTemp()
     return
   }
-
-  // async remove(path) {
-  //   // 遍历移除文件和文件夹
-  //   try {
-  //     if (fs.existsSync(path)) {
-  //       const files = fs.readdirSync(path)
-  //       files.forEach(file => {
-  //         const curPath = `${path}/${file}`
-  //         if (fs.statSync(curPath).isDirectory()) {
-  //           // recurse
-  //           this.remove(curPath)
-  //         } else {
-  //           // delete file
-  //           fs.unlinkSync(curPath)
-  //         }
-  //       })
-  //       fs.rmdirSync(path)
-  //     }
-  //   } catch (err) {
-  //     throw new Error(err)
-  //   }
-  // }
 
   async clearTemp() {
     // 使用系统 rm 命令移除 temp 文件夹

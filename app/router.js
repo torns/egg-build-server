@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 11:35:45
  * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-14 17:56:15
+ * @LastEditTime: 2020-08-19 18:07:24
  * @Description: file content
  */
 
@@ -14,11 +14,12 @@
 module.exports = app => {
   const { router, controller } = app
 
-  router.get('/', controller.home.index)
-
   router.post('/webhook', controller.webhook.index)
   router.post('/webhook/task', controller.webhook.task)
   // router.post('/webhook/queue', controller.webhook.addNewTask)
+
+  router.post('/trigger/single', controller.trigger.single)
+  router.post('/trigger/queue', controller.trigger.queue)
 
   router.post('/project/create', controller.project.create)
   router.post('/project/pack', controller.project.pack)

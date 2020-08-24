@@ -1,8 +1,8 @@
 /*
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
- * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-19 18:18:03
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2020-08-24 15:31:03
  * @Description: file content
  */
 
@@ -10,6 +10,7 @@
 
 const QUEUE_NAME = 'task_list'
 const TASK_LOCK = 'task_lock'
+const ERROR_LIST = 'error_list'
 
 // const download = require('download-git-repo')
 const fs = require('fs-extra')
@@ -81,7 +82,9 @@ class WebhookService extends Service {
 
     let taskList = []
 
-    const res = await app.redis.get(QUEUE_NAME)
+    const res = await app.redis.get(QUEUE_NAME).catch(err => {
+      console.error(err)
+    })
 
     if (res) {
       taskList = isJSON(res) ? JSON.parse(res) : []
@@ -93,10 +96,16 @@ class WebhookService extends Service {
     }
     console.log(info)
     console.log(`加入新任务，当前任务队列长度：${taskList.length}`)
-    await app.redis.set(QUEUE_NAME, JSON.stringify(taskList))
-    await app.redis.persist(QUEUE_NAME)
+    await app.redis.set(QUEUE_NAME, JSON.stringify(taskList)).catch(err => {
+      console.error(err)
+    })
+    await app.redis.persist(QUEUE_NAME).catch(err => {
+      console.error(err)
+    })
 
-    const lockStatus = await this.getTaskLockStatus()
+    const lockStatus = await this.getTaskLockStatus().catch(err => {
+      console.error(err)
+    })
     !lockStatus && this.runTask()
 
     return ctx.returnCtxBody(200, {}, 'success')
@@ -107,23 +116,27 @@ class WebhookService extends Service {
 
     this.changeTaskLockStatus(true)
     // Consumer
-    const res = await app.redis.get(QUEUE_NAME)
+    const res = await app.redis.get(QUEUE_NAME).catch(err => {
+      console.error(err)
+    })
     const taskList = isJSON(res) ? JSON.parse(res) : []
 
     if (taskList.length > 0) {
       const info = taskList.shift()
       console.log('当前任务：', info)
-      try {
-        if (info) {
-          await this.getSource(info)
-        }
-      } catch (err) {
-        // 不中断执行，待任务自行清除
-        console.error(err)
+      if (info) {
+        await this.getSource(info).catch(async err => {
+          console.error(err)
+        })
       }
+
       console.log(`已消费任务，当前任务队列长度：${taskList.length}`)
-      await app.redis.set(QUEUE_NAME, JSON.stringify(taskList))
-      await app.redis.persist(QUEUE_NAME)
+      await app.redis.set(QUEUE_NAME, JSON.stringify(taskList)).catch(err => {
+        console.error(err)
+      })
+      await app.redis.persist(QUEUE_NAME).catch(err => {
+        console.error(err)
+      })
 
       if (taskList.length > 0) return this.runTask()
     }
@@ -153,8 +166,12 @@ class WebhookService extends Service {
       throw new TypeError('无效的锁状态')
     }
 
-    await app.redis.set(TASK_LOCK, status ? 'true' : 'false')
-    await app.redis.persist(TASK_LOCK)
+    await app.redis.set(TASK_LOCK, status ? 'true' : 'false').catch(err => {
+      console.error(err)
+    })
+    await app.redis.persist(TASK_LOCK).catch(err => {
+      console.error(err)
+    })
     return
   }
 
@@ -232,66 +249,61 @@ class WebhookService extends Service {
   }
 
   async getSource(info) {
+    const { ctx } = this
+
     return new Promise((resolve, reject) => {
-      const { ctx } = this
-
       const name = info.repository.name
-      const url = info.repository.git_http_url.split('.git')[0]
+      // const url = info.repository.git_http_url.split('.git')[0]
 
-      try {
-        const dirPath = path.resolve(__dirname, '../public/temp')
-        if (!fs.existsSync(dirPath)) {
-          fs.mkdirSync(dirPath)
-          console.log('temp 创建成功')
-        }
-
-        // git clone
-        process.chdir(dirPath)
-        run('git', ['clone', info.repository.git_http_url], async () => {
-          console.log('clone complete')
-          await ctx.service.establish.build(name, dirPath)
-          resolve('ok')
-        })
-
-        // git http download
-        // const filePath = `${url}/repository/archive.zip?ref=master`
-        // const fileName = `${name}.zip`
-
-        // const stream = fs.createWriteStream(path.resolve(dirPath, fileName))
-
-        // request(filePath, err => {
-        //   if (err) {
-        //     // throw new Error(err)
-        //     reject(new Error(err))
-        //   }
-        // })
-        //   .pipe(stream)
-        //   .on('close', async () => {
-        //     await this.unCompress(fileName)
-        //     await ctx.service.establish.build(name, dirPath)
-        //     resolve('ok')
-        //   })
-      } catch (err) {
-        console.error(`资源获取异常：${err}，请重新获取`)
-        // TODO 修改为异步
-        ctx.service.establish
-          .clearTemp()
-          .then(() => reject(new Error(err)))
-          .catch(e => reject(new Error(`${err} & ${e}`)))
-        // throw new Error(err)
+      const dirPath = path.resolve(__dirname, '../public/temp')
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath)
+        console.log('temp 创建成功')
       }
+
+      // git clone
+      process.chdir(dirPath)
+      run('git', ['clone', info.repository.git_http_url], async () => {
+        console.log('clone complete')
+        await ctx.service.establish.build(name, dirPath).catch(err => {
+          ctx.service.establish
+            .clearTemp()
+            .then(() => reject(new Error(err)))
+            .catch(e => reject(new Error(`${err} & ${e}`)))
+        })
+        resolve('ok')
+      })
+
+      // git http download
+      // const filePath = `${url}/repository/archive.zip?ref=master`
+      // const fileName = `${name}.zip`
+
+      // const stream = fs.createWriteStream(path.resolve(dirPath, fileName))
+
+      // request(filePath, err => {
+      //   if (err) {
+      //     // throw new Error(err)
+      //     reject(new Error(err))
+      //   }
+      // })
+      //   .pipe(stream)
+      //   .on('close', async () => {
+      //     await this.unCompress(fileName)
+      //     await ctx.service.establish.build(name, dirPath)
+      //     resolve('ok')
+      //   })
     })
   }
 
   async unCompress(from) {
-    try {
-      await compressing.zip.uncompress(
+    await compressing.zip
+      .uncompress(
         path.resolve(__dirname, `../public/temp/${from}`),
         path.resolve(__dirname, '../public/temp')
       )
-    } catch (err) {
-      throw new Error(err)
-    }
+      .catch(err => {
+        console.error(err)
+      })
   }
 }
 

@@ -1,8 +1,8 @@
 /*
  * @Author: Whzcorcd
  * @Date: 2020-08-16 11:44:34
- * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-19 18:07:05
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2020-08-24 09:47:22
  * @Description: file content
  */
 
@@ -28,7 +28,7 @@ class TriggerController extends Controller {
     }
 
     const { name, url } = ctx.request.body
-    const perload = {
+    const preload = {
       repository: {
         name,
         git_http_url: url,
@@ -36,7 +36,7 @@ class TriggerController extends Controller {
     }
 
     try {
-      await ctx.service.webhook.addNewTask(perload)
+      await ctx.service.webhook.addNewTask(preload)
     } catch (err) {
       return ctx.returnCtxBody(500, { err }, 'success')
     }
@@ -60,7 +60,7 @@ class TriggerController extends Controller {
 
     const { tasks } = ctx.request.body
 
-    const perload = tasks.map(item => {
+    const preload = tasks.map(item => {
       return {
         repository: {
           name: item.name,
@@ -69,10 +69,10 @@ class TriggerController extends Controller {
       }
     })
 
-    console.log(perload)
+    console.log(preload)
 
     try {
-      await ctx.service.webhook.addNewTask(perload)
+      await ctx.service.webhook.addNewTask(preload)
     } catch (err) {
       return ctx.returnCtxBody(500, { err }, 'success')
     }

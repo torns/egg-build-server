@@ -1,8 +1,8 @@
 /*
  * @Author: Whzcorcd
  * @Date: 2020-08-10 18:40:49
- * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-19 15:07:44
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2020-08-24 09:55:49
  * @Description: file content
  */
 
@@ -109,13 +109,13 @@ class WebhookController extends Controller {
     // 校验通过
     const { body } = ctx.request
     console.log(body)
-    return this.addNewTask(body)
+    return ctx.service.webhook.addNewTask(body)
   }
 
   async index() {
-    const { service } = this
+    const { ctx } = this
 
-    return await service.webhook.parse(1)
+    return await ctx.service.webhook.parse(1)
   }
 }
 

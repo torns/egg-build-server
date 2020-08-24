@@ -1,8 +1,8 @@
 /*
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
- * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-19 18:18:53
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2020-08-24 12:54:13
  * @Description: file content
  */
 
@@ -58,13 +58,17 @@ class EstablishService extends Service {
             if (npm === 'yarn') {
               run(which.sync(npm), ['build'], async () => {
                 console.log('build complete')
-                await this.afterBuild(`${path}/${item}`) // 当前 path 为 temp/...
+                await this.afterBuild(`${path}/${item}`).catch(err => {
+                  console.error(err)
+                }) // 当前 path 为 temp/...
                 resolve('ok')
               })
             } else {
               run(which.sync(npm), ['run', 'build'], async () => {
                 console.log('build complete')
-                await this.afterBuild(`${path}/${item}`) // 当前 path 为 temp/...
+                await this.afterBuild(`${path}/${item}`).catch(err => {
+                  console.error(err)
+                }) // 当前 path 为 temp/...
                 resolve('ok')
               })
             }
@@ -83,9 +87,13 @@ class EstablishService extends Service {
   async afterBuild(path) {
     const { ctx } = this
 
-    await ctx.service.deploy.index(path)
+    await ctx.service.deploy.index(path).catch(err => {
+      console.error(err)
+    })
 
-    await this.clearTemp()
+    await this.clearTemp().catch(err => {
+      console.error(err)
+    })
     return
   }
 

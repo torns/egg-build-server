@@ -1,8 +1,8 @@
 /*
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
- * @LastEditors: Wzhcorcd
- * @LastEditTime: 2020-08-16 02:32:30
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2020-08-24 12:53:22
  * @Description: file content
  */
 
@@ -19,13 +19,16 @@ class DeployService extends Service {
   async index(path) {
     return new Promise((resolve, reject) => {
       try {
-        const file = fs.readFileSync(`${path}/build.yml`).toString()
+        if (fs.existsSync(`${path}/build.yml`)) {
+          const file = fs.readFileSync(`${path}/build.yml`).toString()
+          if (!file) reject(new Error('项目内配置文件不能为空'))
 
-        if (!file) return
-
-        const data = YAML.parse(file)
-        this.deployProject(path, data)
-        resolve(data)
+          const data = YAML.parse(file)
+          this.deployProject(path, data)
+          resolve(data)
+        } else {
+          reject(new Error('项目内配置文件不存在'))
+        }
       } catch (err) {
         reject(err)
       }
@@ -66,7 +69,7 @@ class DeployService extends Service {
       )
     } catch (err) {
       // TODO 完善已存在的情况
-      console.log('目标子项目已存在，将被覆盖')
+      console.warn('目标子项目已存在，将被覆盖')
       throw new Error(err)
     }
 

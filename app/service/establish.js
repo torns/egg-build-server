@@ -2,12 +2,13 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-24 12:54:13
+ * @LastEditTime: 2020-08-24 19:35:46
  * @Description: file content
  */
 
 'use strict'
 
+const YAML = require('yamljs')
 const fs = require('fs-extra')
 const path = require('path')
 const which = require('which')
@@ -18,21 +19,20 @@ const Service = require('egg').Service
 // 开启子进程来执行 node 命令
 function run(cmd, args, fn) {
   args = args || []
-  const runner = childProcess.spawn(cmd, args, {
-    detached: true,
-    stdio: 'inherit',
-  })
-
-  runner.on('error', err => {
-    console.error('Failed to start child process')
-    throw new Error(err)
-  })
-
-  runner.on('close', code => {
-    if (fn) {
-      fn(code)
+  childProcess.execFile(
+    cmd,
+    args,
+    { timeout: 300000, maxBuffer: 4096 * 1024 },
+    (error, stdout) => {
+      if (error) {
+        console.error(error)
+      }
+      console.log(stdout)
+      if (fn) {
+        fn()
+      }
     }
-  })
+  )
 }
 
 class EstablishService extends Service {
@@ -41,46 +41,50 @@ class EstablishService extends Service {
       const { ctx } = this
       // const ignoreList = ['.zip', '.DS_Store']
 
-      try {
-        const npm = ctx.find()
-        const paths = fs.readdirSync(path)
-        console.log(paths)
-        if (!paths.includes(name)) reject(new Error('未找到对应项目目录'))
+      const npm = ctx.find()
+      const paths = fs.readdirSync(path)
+      console.log(paths)
+      if (!paths.includes(name)) reject(new Error('未找到对应项目目录'))
 
-        paths.forEach(item => {
-          if (!item.includes(name)) return
-          if (item.includes('.zip')) return
+      paths.forEach(item => {
+        if (!item.includes(name)) return
+        if (item.includes('.zip')) return
 
-          process.chdir(`${path}/${item}`)
-          run(which.sync(npm), ['install'], () => {
-            console.log('install complete')
-            // TODO 私有化构建
-            if (npm === 'yarn') {
-              run(which.sync(npm), ['build'], async () => {
+        if (!fs.existsSync(`${path}/${item}/build.yml`)) {
+          reject(new Error('项目内配置文件不存在'))
+        }
+
+        const file = fs.readFileSync(`${path}/${item}/build.yml`).toString()
+        if (!file) reject(new Error('项目内配置文件不能为空'))
+
+        const data = YAML.parse(file)
+        const command = data.command ? data.command.build : 'build'
+
+        process.chdir(`${path}/${item}`)
+        run(which.sync(npm), ['install'], () => {
+          console.log('install complete')
+          console.log(`构建命令:${command}`)
+          // TODO 私有化构建
+          try {
+            run(
+              which.sync(npm),
+              npm === 'yarn' ? [command] : ['run', command],
+              async () => {
                 console.log('build complete')
                 await this.afterBuild(`${path}/${item}`).catch(err => {
                   console.error(err)
                 }) // 当前 path 为 temp/...
                 resolve('ok')
-              })
-            } else {
-              run(which.sync(npm), ['run', 'build'], async () => {
-                console.log('build complete')
-                await this.afterBuild(`${path}/${item}`).catch(err => {
-                  console.error(err)
-                }) // 当前 path 为 temp/...
-                resolve('ok')
-              })
-            }
-          })
+              }
+            )
+          } catch (err) {
+            console.error(`应用构建异常：${err}，请重新尝试`)
+            this.clearTemp()
+              .then(() => reject(new Error(err)))
+              .catch(e => reject(new Error(`${err} & ${e}`)))
+          }
         })
-      } catch (err) {
-        console.error(`应用构建异常：${err}，请重新获取`)
-        this.clearTemp()
-          .then(() => reject(new Error(err)))
-          .catch(e => reject(new Error(`${err} & ${e}`)))
-        // throw new Error(err)
-      }
+      })
     })
   }
 

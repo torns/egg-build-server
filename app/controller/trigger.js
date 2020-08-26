@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-16 11:44:34
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-24 09:47:22
+ * @LastEditTime: 2020-08-26 10:40:24
  * @Description: file content
  */
 
@@ -17,6 +17,7 @@ class TriggerController extends Controller {
     const rule = {
       name: { type: 'string', required: true },
       url: { type: 'string', required: true },
+      branch: { type: 'string', required: false },
     }
 
     try {
@@ -27,11 +28,12 @@ class TriggerController extends Controller {
       return
     }
 
-    const { name, url } = ctx.request.body
+    const { name, url, branch } = ctx.request.body
     const preload = {
       repository: {
         name,
         git_http_url: url,
+        branch: branch || 'master',
       },
     }
 
@@ -65,6 +67,7 @@ class TriggerController extends Controller {
         repository: {
           name: item.name,
           git_http_url: item.url,
+          branch: 'master',
         },
       }
     })

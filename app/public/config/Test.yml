@@ -6,5 +6,5 @@ property:
   port: 80
 
 configuration:
-  imagename: gdy
-  tag: 1.0.1
+  imagename: gdy-fe-consoles
+  tag: 1.1.6

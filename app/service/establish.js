@@ -2,13 +2,12 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-24 19:35:46
+ * @LastEditTime: 2020-08-26 09:33:56
  * @Description: file content
  */
 
 'use strict'
 
-const YAML = require('yamljs')
 const fs = require('fs-extra')
 const path = require('path')
 const which = require('which')
@@ -46,19 +45,17 @@ class EstablishService extends Service {
       console.log(paths)
       if (!paths.includes(name)) reject(new Error('未找到对应项目目录'))
 
-      paths.forEach(item => {
+      paths.forEach(async item => {
         if (!item.includes(name)) return
         if (item.includes('.zip')) return
 
-        if (!fs.existsSync(`${path}/${item}/build.yml`)) {
-          reject(new Error('项目内配置文件不存在'))
-        }
+        const config = await ctx.service.analysis
+          .getProjectConfig(`${path}/${item}`)
+          .catch(err => {
+            console.error(err)
+          })
 
-        const file = fs.readFileSync(`${path}/${item}/build.yml`).toString()
-        if (!file) reject(new Error('项目内配置文件不能为空'))
-
-        const data = YAML.parse(file)
-        const command = data.command ? data.command.build : 'build'
+        const command = config.command ? config.command.build : 'build'
 
         process.chdir(`${path}/${item}`)
         run(which.sync(npm), ['install'], () => {

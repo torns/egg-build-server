@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-24 15:31:03
+ * @LastEditTime: 2020-08-26 09:56:40
  * @Description: file content
  */
 
@@ -250,9 +250,9 @@ class WebhookService extends Service {
 
   async getSource(info) {
     const { ctx } = this
+    const { name, git_http_url, branch } = info.repository
 
     return new Promise((resolve, reject) => {
-      const name = info.repository.name
       // const url = info.repository.git_http_url.split('.git')[0]
 
       const dirPath = path.resolve(__dirname, '../public/temp')
@@ -261,9 +261,14 @@ class WebhookService extends Service {
         console.log('temp 创建成功')
       }
 
+      // 支持分支选择构建
+      const args = branch
+        ? ['clone', '-b', branch, git_http_url]
+        : ['clone', git_http_url]
+
       // git clone
       process.chdir(dirPath)
-      run('git', ['clone', info.repository.git_http_url], async () => {
+      run('git', [...args], async () => {
         console.log('clone complete')
         await ctx.service.establish.build(name, dirPath).catch(err => {
           ctx.service.establish

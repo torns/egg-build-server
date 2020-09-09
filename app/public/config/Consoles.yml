@@ -8,4 +8,4 @@ property:
 
 configuration:
   imagename: gdy-fe-consoles-test
-  tag: 1.1.0
+  tag: 1.1.1

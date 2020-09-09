@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-16 11:44:34
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-26 10:40:24
+ * @LastEditTime: 2020-09-08 11:53:44
  * @Description: file content
  */
 
@@ -67,7 +67,7 @@ class TriggerController extends Controller {
         repository: {
           name: item.name,
           git_http_url: item.url,
-          branch: 'master',
+          branch: item.branch || 'master',
         },
       }
     })

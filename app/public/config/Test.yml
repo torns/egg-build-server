@@ -3,7 +3,8 @@ version: 1.0
 
 property:
   server: consoles.guangdianyun.tv
-  port: 80
+  domain: guangdianyun.tv
+  port: 3000
 
 configuration:
   imagename: gdy-fe-consoles

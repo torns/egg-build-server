@@ -1,0 +1,11 @@
+# test.yml
+version: 1.0
+
+property:
+  server: consoles.aodianyun.cn
+  domain: aodianyun.cn
+  port: 3000
+
+configuration:
+  imagename: gdy-fe-consoles-test
+  tag: 1.1.0

@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-13 10:18:42
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-14 10:11:21
+ * @LastEditTime: 2020-09-07 16:40:00
  * @Description: file content
  */
 
@@ -55,7 +55,7 @@ class ProjectService extends Service {
       }
 
       const data = YAML.parse(fs.readFileSync(filePath).toString())
-      const { server, port } = data.property
+      const { server, domain, port } = data.property
       const files = fs.readdirSync(originalPath)
 
       files.forEach(item => {
@@ -68,7 +68,12 @@ class ProjectService extends Service {
 
       fs.writeFileSync(
         `${targetPath}/nginx.conf`,
-        config.stringify().replace('your_website_server_name', server)
+        config
+          .stringify()
+          .replace('your_website_server_name', server)
+          .replace('your_website_domain', domain)
+          .replace('your_website_domain', domain)
+          .replace('your_website_port', port)
       )
     } catch (err) {
       throw new Error(err)

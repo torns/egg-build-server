@@ -2,13 +2,12 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-26 09:33:29
+ * @LastEditTime: 2020-09-08 11:24:59
  * @Description: file content
  */
 
 'use strict'
 
-const YAML = require('yamljs')
 const fs = require('fs-extra')
 const path = require('path')
 const ncp = require('nginx-config-parser')
@@ -34,8 +33,8 @@ class DeployService extends Service {
     const project = yamlData.target.project
     const location = yamlData.target.location
     const server = yamlData.target.server
-    const spa = Boolean(yamlData.config.spa)
-    const ssr = Boolean(yamlData.config.ssr)
+    // const spa = Boolean(yamlData.config.spa)
+    // const ssr = Boolean(yamlData.config.ssr)
     const folder = yamlData.config.folder || 'dist'
 
     const projectPath = path.resolve(

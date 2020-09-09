@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-26 09:33:56
+ * @LastEditTime: 2020-09-08 12:19:24
  * @Description: file content
  */
 
@@ -55,7 +55,7 @@ class EstablishService extends Service {
             console.error(err)
           })
 
-        const command = config.command ? config.command.build : 'build'
+        const command = config.command ? config.command.build : 'build:private'
 
         process.chdir(`${path}/${item}`)
         run(which.sync(npm), ['install'], () => {

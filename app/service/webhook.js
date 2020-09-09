@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-26 09:56:40
+ * @LastEditTime: 2020-09-08 11:52:10
  * @Description: file content
  */
 
@@ -269,7 +269,7 @@ class WebhookService extends Service {
       // git clone
       process.chdir(dirPath)
       run('git', [...args], async () => {
-        console.log('clone complete')
+        console.log(`branch:${branch} clone complete`)
         await ctx.service.establish.build(name, dirPath).catch(err => {
           ctx.service.establish
             .clearTemp()

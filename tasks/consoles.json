@@ -1,0 +1,128 @@
+{
+  "tasks": [{
+      "name": "guangdian_console",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/guangdian_console.git",
+      "branch": "test"
+    },
+    {
+      "name": "consoles_program",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/consoles_program.git",
+      "branch": "test"
+    },
+    {
+      "name": "control_live",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/control_live.git",
+      "branch": "test"
+    },
+    {
+      "name": "control_piclive",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/control_piclive.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_lcps",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/xiawei/project_lcps.git",
+      "branch": "test"
+    },
+    {
+      "name": "Lcps",
+      "url": "https://github.com/corcd/Lcps.git",
+      "branch": "test"
+    },
+    {
+      "name": "Lcps-Monitor",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/lcps/Lcps-Monitor.git",
+      "branch": "test"
+    },
+    {
+      "name": "Lcps-Delay",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/lcps/Lcps-Delay.git",
+      "branch": "test"
+    },
+    {
+      "name": "Lcps-Scene",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/lcps/Lcps-Scene.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_lpsWatch",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/project_lpsWatch.git",
+      "branch": "test"
+    },
+    {
+      "name": "gdy-conlcps",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/jinxuefeng/gdy-conlcps.git",
+      "branch": "test"
+    },
+    {
+      "name": "lcps-client",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/jinxuefeng/lcps-client.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_cloud",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/project_cloud.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_necs",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/project_necs.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_tte",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/project_tte.git",
+      "branch": "test"
+    },
+    {
+      "name": "guangdian_rcs_app",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/guangdian_rcs_app.git",
+      "branch": "test"
+    },
+    {
+      "name": "guangdian_res_app",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/guangdian_res_app.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_clip_app",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/project_clip_app.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_mqes",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/project_mqes.git",
+      "branch": "test"
+    },
+    {
+      "name": "project__mss",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/huangrongfeng/project__mss.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_active",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/project_active.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_data",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/xiawei/project_data.git",
+      "branch": "test"
+    },
+    {
+      "name": "usercount",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/usercount.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_money",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/huangrongfeng/project_money.git",
+      "branch": "test"
+    },
+    {
+      "name": "project_system",
+      "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/project_system.git",
+      "branch": "test"
+    }
+  ]
+}

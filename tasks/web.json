@@ -1,0 +1,42 @@
+{
+  "tasks": [{
+    "name": "web_lottery",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/web_lottery.git",
+    "branch": "test"
+  },
+  {
+    "name": "web_vote",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/laihuiliang/web_vote.git",
+    "branch": "test"
+  },
+  {
+    "name": "web_questionaire",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/web_questionaire.git",
+    "branch": "test"
+  },
+  {
+    "name": "web-live",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/web-live.git",
+    "branch": "test"
+  },
+  {
+    "name": "web-piclive",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/web-piclive.git",
+    "branch": "test"
+  },
+  {
+    "name": "web-my",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/web-my.git",
+    "branch": "test"
+  },
+  {
+    "name": "web-invite",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/web-invite.git",
+    "branch": "test"
+  },
+  {
+    "name": "web-pay",
+    "url": "http://wanghanze:whz18267590821@gitlab.aodianyun.com/broadcast_cloud/web-pay.git",
+    "branch": "test"
+  }]
+}

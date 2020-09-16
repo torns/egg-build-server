@@ -1,0 +1,70 @@
+version: '2.3'
+services:
+  gdy-fe-web:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/gdy-fe-web-test:1.1.0
+    ports:
+      - 80:7000
+    networks:
+      outsidenetwork:
+        ipv4_address: 172.18.0.2
+    environment:
+      RUNMODE: prod
+    restart: always
+
+  web-live:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-live:1.0.9
+    ports:
+      - 3000
+    networks:
+      insidenetwork:
+        ipv4_address: 172.17.0.2
+    environment:
+      RUNMODE: prod
+    restart: always
+
+  web-piclive:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-piclive:1.0.0
+    ports:
+      - 3003
+    networks:
+      insidenetwork:
+        ipv4_address: 172.17.0.3
+    environment:
+      RUNMODE: prod
+    restart: always
+
+  web-person:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-person:1.0.0
+    ports:
+      - 3004
+    networks:
+      insidenetwork:
+        ipv4_address: 172.17.0.4
+    environment:
+      RUNMODE: prod
+    restart: always
+
+  web-invitation:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-invitation:1.0.0
+    ports:
+      - 3005
+    networks:
+      insidenetwork:
+        ipv4_address: 172.17.0.5
+    environment:
+      RUNMODE: prod
+    restart: always
+
+networks:
+  outsidenetwork:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
+  insidenetwork:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.17.0.0/16
+          gateway: 172.17.0.1

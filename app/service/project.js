@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-13 10:18:42
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-09-07 16:40:00
+ * @LastEditTime: 2020-09-09 11:01:45
  * @Description: file content
  */
 
@@ -82,7 +82,7 @@ class ProjectService extends Service {
     return true
   }
 
-  async packProject(name) {
+  async packProject(name, tag) {
     const filePath = path.resolve(__dirname, `../public/config/${name}.yml`)
     const projectPath = path.resolve(__dirname, `../public/workspace/${name}`)
 
@@ -98,7 +98,7 @@ class ProjectService extends Service {
       }
 
       const data = YAML.parse(fs.readFileSync(filePath).toString())
-      const { imagename, tag } = data.configuration
+      const { imagename } = data.configuration
 
       process.chdir(projectPath)
 

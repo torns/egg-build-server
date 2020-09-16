@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-09-08 12:19:24
+ * @LastEditTime: 2020-09-11 14:04:33
  * @Description: file content
  */
 
@@ -55,13 +55,22 @@ class EstablishService extends Service {
             console.error(err)
           })
 
+        // eslint-disable-next-line no-extra-boolean-cast
+        if (Boolean(config.config.ssr)) {
+          // ssr 项目不参与主包构建
+          console.log('ssr 项目')
+          await this.afterBuild(`${path}/${item}`).catch(err => {
+            console.error(err)
+          })
+          resolve('skip')
+        }
+
         const command = config.command ? config.command.build : 'build:private'
 
         process.chdir(`${path}/${item}`)
         run(which.sync(npm), ['install'], () => {
           console.log('install complete')
           console.log(`构建命令:${command}`)
-          // TODO 私有化构建
           try {
             run(
               which.sync(npm),

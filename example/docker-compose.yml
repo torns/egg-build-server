@@ -1,0 +1,46 @@
+version: '3'
+services:
+  gdy-fe-web:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/gdy-fe-web-test:1.1.0
+    ports:
+      - 80:7000
+    depends_on: 
+      - web-live
+      - web-piclive
+      - web-person
+      - web-invitation
+    environment:
+      RUNMODE: prod
+    restart: always
+  web-live:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-live:1.0.9
+    ports:
+      - 3000
+    network_mode: host
+    environment:
+      RUNMODE: prod
+    restart: always
+  web-piclive:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-piclive:1.0.0
+    ports:
+      - 3003
+    network_mode: host
+    environment:
+      RUNMODE: prod
+    restart: always
+  web-person:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-person:1.0.0
+    ports:
+      - 3004
+    network_mode: host
+    environment:
+      RUNMODE: prod
+    restart: always
+  web-invitation:
+    image: registry.cn-hangzhou.aliyuncs.com/gd-hub/web-invitation:1.0.0
+    ports:
+      - 3005
+    network_mode: host
+    environment:
+      RUNMODE: prod
+    restart: always

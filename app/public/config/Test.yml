@@ -8,4 +8,3 @@ property:
 
 configuration:
   imagename: gdy-fe-consoles
-  tag: 1.1.6

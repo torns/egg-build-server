@@ -1,0 +1,10 @@
+# test.yml
+version: 1.0
+
+property:
+  server: web.aodianyun.cn
+  domain: aodianyun.cn
+  port: 80
+
+configuration:
+  imagename: gdy-fe-web-test

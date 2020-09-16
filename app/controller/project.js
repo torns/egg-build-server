@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-13 16:26:38
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-13 18:56:00
+ * @LastEditTime: 2020-09-09 11:05:50
  * @Description: file content
  */
 
@@ -38,7 +38,10 @@ class ProjectController extends Controller {
   async pack() {
     const { ctx, service } = this
 
-    const rule = { name: { type: 'string', required: true } }
+    const rule = {
+      name: { type: 'string', required: true },
+      tag: { type: 'string', required: true },
+    }
 
     try {
       ctx.validate(rule, ctx.request.body)
@@ -48,9 +51,9 @@ class ProjectController extends Controller {
       return
     }
 
-    const { name } = ctx.request.body
+    const { name, tag } = ctx.request.body
 
-    service.project.packProject(name)
+    service.project.packProject(name, tag)
 
     return ctx.returnCtxBody(200, {}, 'success')
   }

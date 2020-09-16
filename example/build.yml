@@ -2,11 +2,12 @@
 version: 0.1
 
 config:
-  spa: true
-  ssr: false
-  folder: dist
-  server: /consoles\.guangdianyun\.tv/
+  spa: false
+  ssr: true
+  folder: ''
+  proxy: http://172.17.0.1:3001
+  server: /web\.guangdianyun\.tv/
 
 target:
-  project: G-UI
-  location: test
+  project: Web
+  location: live

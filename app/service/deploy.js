@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-09-16 11:19:57
+ * @LastEditTime: 2020-11-12 18:56:50
  * @Description: file content
  */
 
@@ -15,21 +15,21 @@ const ncp = require('nginx-config-parser')
 const Service = require('egg').Service
 
 class DeployService extends Service {
-  async index(path) {
+  async index(solutions, path) {
     const { ctx } = this
     return new Promise(async (resolve, reject) => {
       const config = await ctx.service.analysis
-        .getProjectConfig(path)
+        .getProjectConfig(solutions, path)
         .catch(err => {
           console.error(err)
           reject(err)
         })
-      this.deployProject(path, config)
+      this.deployProject(solutions, path, config)
       resolve(config)
     })
   }
 
-  async deployProject(filePath, yamlData) {
+  async deployProject(solutions, filePath, yamlData) {
     const project = yamlData.target.project
     const location = yamlData.target.location
     const server = yamlData.target.server
@@ -40,7 +40,7 @@ class DeployService extends Service {
 
     const projectPath = path.resolve(
       __dirname,
-      `../public/workspace/${project}`
+      `../public/workspace/${solutions}/${project}`
     )
     // 统一为先创建项目
     // if (!fs.existsSync(projectPath)) {
@@ -53,16 +53,25 @@ class DeployService extends Service {
       if (!fs.existsSync(`${projectPath}/app/${location}`)) {
         fs.mkdirSync(`${projectPath}/app/${location}`)
         console.log('子项目创建成功')
+      } else {
+        const files = fs.readdirSync(`${projectPath}/app/${location}`)
+        files.forEach(file => {
+          const curPath = `${projectPath}/app/${location}/${file}`
+          if (fs.statSync(curPath).isDirectory()) {
+            // recurse
+            fs.rmdirSync(`${projectPath}/app/${location}`)
+            console.log('文件夹')
+          } else {
+            // delete file
+            fs.unlinkSync(curPath, err => {
+              if (err) throw err
+            })
+          }
+        })
       }
 
       try {
-        fs.renameSync(
-          `${filePath}/${folder}`,
-          path.resolve(
-            __dirname,
-            `../public/workspace/${project}/app/${location}`
-          )
-        )
+        fs.renameSync(`${filePath}/${folder}`, `${projectPath}/app/${location}`)
       } catch (err) {
         // TODO 完善已存在的情况
         console.warn('目标子项目已存在，将被覆盖')
@@ -174,7 +183,7 @@ class DeployService extends Service {
           .addDirective('add_header', 'Vary', '"Accept-Encoding, User-Agent"')
           .addDirective('proxy_http_version', '1.1')
           .addDirective('proxy_pass', proxy)
-          .addDirective('indexOf', 'index.html', 'index.htm')
+          .addDirective('index', 'index.html', 'index.htm')
           .addToQuery()
       }
 

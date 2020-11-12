@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-16 11:44:34
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-09-08 11:53:44
+ * @LastEditTime: 2020-11-12 18:03:28
  * @Description: file content
  */
 
@@ -60,7 +60,7 @@ class TriggerController extends Controller {
     //   return
     // }
 
-    const { tasks } = ctx.request.body
+    const { solutions, tasks } = ctx.request.body
 
     const preload = tasks.map(item => {
       return {
@@ -75,7 +75,7 @@ class TriggerController extends Controller {
     console.log(preload)
 
     try {
-      await ctx.service.webhook.addNewTask(preload)
+      await ctx.service.webhook.addNewTask(solutions, preload)
     } catch (err) {
       return ctx.returnCtxBody(500, { err }, 'success')
     }

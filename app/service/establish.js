@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-09-11 14:04:33
+ * @LastEditTime: 2020-11-12 18:45:34
  * @Description: file content
  */
 
@@ -35,7 +35,7 @@ function run(cmd, args, fn) {
 }
 
 class EstablishService extends Service {
-  async build(name, path) {
+  async build(solutions, name, path) {
     return new Promise((resolve, reject) => {
       const { ctx } = this
       // const ignoreList = ['.zip', '.DS_Store']
@@ -50,7 +50,7 @@ class EstablishService extends Service {
         if (item.includes('.zip')) return
 
         const config = await ctx.service.analysis
-          .getProjectConfig(`${path}/${item}`)
+          .getProjectConfig(solutions, `${path}/${item}`)
           .catch(err => {
             console.error(err)
           })
@@ -59,7 +59,7 @@ class EstablishService extends Service {
         if (Boolean(config.config.ssr)) {
           // ssr 项目不参与主包构建
           console.log('ssr 项目')
-          await this.afterBuild(`${path}/${item}`).catch(err => {
+          await this.afterBuild(solutions, `${path}/${item}`).catch(err => {
             console.error(err)
           })
           resolve('skip')
@@ -77,9 +77,11 @@ class EstablishService extends Service {
               npm === 'yarn' ? [command] : ['run', command],
               async () => {
                 console.log('build complete')
-                await this.afterBuild(`${path}/${item}`).catch(err => {
-                  console.error(err)
-                }) // 当前 path 为 temp/...
+                await this.afterBuild(solutions, `${path}/${item}`).catch(
+                  err => {
+                    console.error(err)
+                  }
+                ) // 当前 path 为 temp/...
                 resolve('ok')
               }
             )
@@ -94,10 +96,10 @@ class EstablishService extends Service {
     })
   }
 
-  async afterBuild(path) {
+  async afterBuild(solutions = '', path) {
     const { ctx } = this
 
-    await ctx.service.deploy.index(path).catch(err => {
+    await ctx.service.deploy.index(solutions, path).catch(err => {
       console.error(err)
     })
 

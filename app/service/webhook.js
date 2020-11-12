@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-09-08 11:52:10
+ * @LastEditTime: 2020-11-12 18:05:22
  * @Description: file content
  */
 
@@ -77,7 +77,7 @@ function checkType(options) {
 }
 
 class WebhookService extends Service {
-  async addNewTask(info) {
+  async addNewTask(solutions, info) {
     const { ctx, app } = this
 
     let taskList = []
@@ -106,12 +106,12 @@ class WebhookService extends Service {
     const lockStatus = await this.getTaskLockStatus().catch(err => {
       console.error(err)
     })
-    !lockStatus && this.runTask()
+    !lockStatus && this.runTask(solutions)
 
     return ctx.returnCtxBody(200, {}, 'success')
   }
 
-  async runTask() {
+  async runTask(solutions) {
     const { app } = this
 
     this.changeTaskLockStatus(true)
@@ -125,7 +125,7 @@ class WebhookService extends Service {
       const info = taskList.shift()
       console.log('当前任务：', info)
       if (info) {
-        await this.getSource(info).catch(async err => {
+        await this.getSource(solutions, info).catch(async err => {
           console.error(err)
         })
       }
@@ -248,7 +248,7 @@ class WebhookService extends Service {
     return
   }
 
-  async getSource(info) {
+  async getSource(solutions, info) {
     const { ctx } = this
     const { name, git_http_url, branch } = info.repository
 
@@ -270,12 +270,14 @@ class WebhookService extends Service {
       process.chdir(dirPath)
       run('git', [...args], async () => {
         console.log(`branch:${branch} clone complete`)
-        await ctx.service.establish.build(name, dirPath).catch(err => {
-          ctx.service.establish
-            .clearTemp()
-            .then(() => reject(new Error(err)))
-            .catch(e => reject(new Error(`${err} & ${e}`)))
-        })
+        await ctx.service.establish
+          .build(solutions, name, dirPath)
+          .catch(err => {
+            ctx.service.establish
+              .clearTemp()
+              .then(() => reject(new Error(err)))
+              .catch(e => reject(new Error(`${err} & ${e}`)))
+          })
         resolve('ok')
       })
 

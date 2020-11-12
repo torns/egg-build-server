@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-26 09:14:45
+ * @LastEditTime: 2020-11-12 18:47:41
  * @Description: file content
  */
 
@@ -14,7 +14,7 @@ const fs = require('fs-extra')
 const Service = require('egg').Service
 
 class AnalysisService extends Service {
-  async getProjectConfig(path) {
+  async getProjectConfig(solutions, path) {
     return new Promise((resolve, reject) => {
       try {
         if (fs.existsSync(`${path}/build.yml`)) {
@@ -22,7 +22,8 @@ class AnalysisService extends Service {
           if (!file) reject(new Error('项目内配置文件不能为空'))
 
           const data = YAML.parse(file)
-          resolve(data)
+          // console.log(data[solutions])
+          resolve(data[solutions])
         } else {
           reject(new Error('项目内配置文件不存在'))
         }

@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-12 18:45:34
+ * @LastEditTime: 2020-11-13 09:14:15
  * @Description: file content
  */
 
@@ -55,6 +55,7 @@ class EstablishService extends Service {
             console.error(err)
           })
 
+        // console.log(`${path}/${item}`, config)
         // eslint-disable-next-line no-extra-boolean-cast
         if (Boolean(config.config.ssr)) {
           // ssr 项目不参与主包构建

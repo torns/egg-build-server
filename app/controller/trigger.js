@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-16 11:44:34
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-12 18:03:28
+ * @LastEditTime: 2020-11-13 09:10:51
  * @Description: file content
  */
 
@@ -15,6 +15,7 @@ class TriggerController extends Controller {
     const { ctx } = this
 
     const rule = {
+      solutions: { type: 'string', required: true },
       name: { type: 'string', required: true },
       url: { type: 'string', required: true },
       branch: { type: 'string', required: false },
@@ -28,7 +29,7 @@ class TriggerController extends Controller {
       return
     }
 
-    const { name, url, branch } = ctx.request.body
+    const { solutions, name, url, branch } = ctx.request.body
     const preload = {
       repository: {
         name,
@@ -38,7 +39,7 @@ class TriggerController extends Controller {
     }
 
     try {
-      await ctx.service.webhook.addNewTask(preload)
+      await ctx.service.webhook.addNewTask(solutions, preload)
     } catch (err) {
       return ctx.returnCtxBody(500, { err }, 'success')
     }

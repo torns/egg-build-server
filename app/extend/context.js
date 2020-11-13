@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 17:06:30
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-12 09:03:01
+ * @LastEditTime: 2020-11-13 09:15:40
  * @Description: file content
  */
 
@@ -18,7 +18,7 @@ module.exports = {
       try {
         // 查找环境变量下指定的可执行文件的第一个实例
         which.sync(npms[i])
-        console.log('use npm: ' + npms[i])
+        console.log('use: ' + npms[i])
         return npms[i]
       } catch (err) {
         throw new Error(err)

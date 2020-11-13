@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 19:13:04
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-12 18:05:22
+ * @LastEditTime: 2020-11-13 09:14:00
  * @Description: file content
  */
 
@@ -138,7 +138,7 @@ class WebhookService extends Service {
         console.error(err)
       })
 
-      if (taskList.length > 0) return this.runTask()
+      if (taskList.length > 0) return this.runTask(solutions)
     }
 
     this.changeTaskLockStatus(false)
@@ -175,78 +175,78 @@ class WebhookService extends Service {
     return
   }
 
-  async parse(id) {
-    const { ctx } = this
+  // async parse(id) {
+  //   const { ctx } = this
 
-    const { req } = ctx
+  //   const { req } = ctx
 
-    if (!id) return null
+  //   if (!id) return null
 
-    const handlers = [
-      {
-        path: 'http://gitlab.aodianyun.com/common/gitlab-webhook-test',
-        secret: '1d9f84d2bf0a3e759dd2995d1791168a',
-        events: ['Push Hook'],
-      },
-      {
-        path: 'http://www.test.com/test',
-        secret: '1d9f84d2bf0a3e759dd2995d1791168a',
-        events: ['Push Hook'],
-      },
-    ]
+  //   const handlers = [
+  //     {
+  //       path: 'http://gitlab.aodianyun.com/common/gitlab-webhook-test',
+  //       secret: '1d9f84d2bf0a3e759dd2995d1791168a',
+  //       events: ['Push Hook'],
+  //     },
+  //     {
+  //       path: 'http://www.test.com/test',
+  //       secret: '1d9f84d2bf0a3e759dd2995d1791168a',
+  //       events: ['Push Hook'],
+  //     },
+  //   ]
 
-    let currentOptions
-    if (Array.isArray(handlers)) {
-      currentOptions = findHandler(
-        req.headers.referer.split('?').shift(),
-        handlers
-      )
-    } else {
-      currentOptions = handlers
-    }
+  //   let currentOptions
+  //   if (Array.isArray(handlers)) {
+  //     currentOptions = findHandler(
+  //       req.headers.referer.split('?').shift(),
+  //       handlers
+  //     )
+  //   } else {
+  //     currentOptions = handlers
+  //   }
 
-    console.log(currentOptions)
-    if (!currentOptions) {
-      return ctx.returnCtxBody(400, {}, 'illegal access')
-    }
+  //   console.log(currentOptions)
+  //   if (!currentOptions) {
+  //     return ctx.returnCtxBody(400, {}, 'illegal access')
+  //   }
 
-    checkType(currentOptions)
+  //   checkType(currentOptions)
 
-    if (
-      req.headers.referer.split('?').shift() !== currentOptions.path ||
-      req.method !== 'POST'
-    ) {
-      return ctx.returnCtxBody(400, {}, 'illegal access')
-    }
+  //   if (
+  //     req.headers.referer.split('?').shift() !== currentOptions.path ||
+  //     req.method !== 'POST'
+  //   ) {
+  //     return ctx.returnCtxBody(400, {}, 'illegal access')
+  //   }
 
-    const token = req.headers['x-gitlab-token']
-    if (!token || token !== currentOptions.secret) {
-      return ctx.returnCtxBody(
-        400,
-        {},
-        'no X-Gitlab-Token found on request or the token did not match'
-      )
-    }
+  //   const token = req.headers['x-gitlab-token']
+  //   if (!token || token !== currentOptions.secret) {
+  //     return ctx.returnCtxBody(
+  //       400,
+  //       {},
+  //       'no X-Gitlab-Token found on request or the token did not match'
+  //     )
+  //   }
 
-    const event = req.headers['x-gitlab-event']
-    const events = currentOptions.events
+  //   const event = req.headers['x-gitlab-event']
+  //   const events = currentOptions.events
 
-    if (!event) {
-      return ctx.returnCtxBody(400, {}, 'no X-Gitlab-Event found on request')
-    }
+  //   if (!event) {
+  //     return ctx.returnCtxBody(400, {}, 'no X-Gitlab-Event found on request')
+  //   }
 
-    if (events && events.indexOf(event) === -1) {
-      return ctx.returnCtxBody(400, {}, 'X-Gitlab-Event is not acceptable')
-    }
+  //   if (events && events.indexOf(event) === -1) {
+  //     return ctx.returnCtxBody(400, {}, 'X-Gitlab-Event is not acceptable')
+  //   }
 
-    const { body } = ctx.request
-    console.log(body)
-    ctx.returnCtxBody(200, { ok: true }, 'success')
+  //   const { body } = ctx.request
+  //   console.log(body)
+  //   ctx.returnCtxBody(200, { ok: true }, 'success')
 
-    await this.getSource(body)
+  //   await this.getSource(body)
 
-    return
-  }
+  //   return
+  // }
 
   async getSource(solutions, info) {
     const { ctx } = this

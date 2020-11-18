@@ -2,13 +2,14 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-13 09:14:15
+ * @LastEditTime: 2020-11-18 11:41:57
  * @Description: file content
  */
 
 'use strict'
 
 const fs = require('fs-extra')
+const rimraf = require('rimraf')
 const path = require('path')
 const which = require('which')
 const childProcess = require('child_process')
@@ -63,12 +64,13 @@ class EstablishService extends Service {
           await this.afterBuild(solutions, `${path}/${item}`).catch(err => {
             console.error(err)
           })
-          resolve('skip')
+          return resolve('skip')
         }
 
         const command = config.command ? config.command.build : 'build:private'
 
         process.chdir(`${path}/${item}`)
+
         run(which.sync(npm), ['install'], () => {
           console.log('install complete')
           console.log(`构建命令:${command}`)
@@ -111,18 +113,27 @@ class EstablishService extends Service {
   }
 
   async clearTemp() {
-    // 使用系统 rm 命令移除 temp 文件夹
+    // 移除 temp 文件夹
     return new Promise((resolve, reject) => {
       const finalPath = path.resolve(__dirname, '../public')
 
       try {
         process.chdir(finalPath)
-        run('rm', ['-r', '-f', 'temp'], () => {
+        rimraf(`${finalPath}/temp`, err => {
+          if (err) console.log(err)
           console.log('clear temp area complete')
+
           fs.mkdirSync(`${finalPath}/temp`)
+
           console.log('rebuild temp area complete')
           resolve('ok')
         })
+        // run('rm', ['-r', '-f', 'temp'], () => {
+        //   console.log('clear temp area complete')
+        //   fs.mkdirSync(`${finalPath}/temp`)
+        //   console.log('rebuild temp area complete')
+        //   resolve('ok')
+        // })
       } catch (err) {
         console.error(err)
         reject(err)

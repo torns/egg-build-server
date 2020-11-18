@@ -20,6 +20,7 @@
     "github-webhook-handler": "^1.0.0",
     "nginx-config-parser": "^0.1.1",
     "request": "^2.88.2",
+    "rimraf": "^3.0.2",
     "which": "^2.0.2",
     "yamljs": "^0.3.0"
   },

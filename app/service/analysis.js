@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-12 18:47:41
+ * @LastEditTime: 2020-11-18 11:00:16
  * @Description: file content
  */
 
@@ -22,7 +22,7 @@ class AnalysisService extends Service {
           if (!file) reject(new Error('项目内配置文件不能为空'))
 
           const data = YAML.parse(file)
-          // console.log(data[solutions])
+          console.log(data[solutions])
           resolve(data[solutions])
         } else {
           reject(new Error('项目内配置文件不存在'))

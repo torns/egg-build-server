@@ -2,17 +2,30 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-12 18:56:50
+ * @LastEditTime: 2020-11-18 15:10:50
  * @Description: file content
  */
 
 'use strict'
 
 const fs = require('fs-extra')
+const rimraf = require('rimraf')
 const path = require('path')
 const ncp = require('nginx-config-parser')
 
 const Service = require('egg').Service
+
+function remove(path) {
+  return new Promise((resolve, reject) => {
+    rimraf(path, err => {
+      if (err) {
+        console.log(err)
+        return reject(err)
+      }
+      return resolve('ok')
+    })
+  })
+}
 
 class DeployService extends Service {
   async index(solutions, path) {
@@ -50,28 +63,20 @@ class DeployService extends Service {
     // }
     if (!ssr) {
       // ssr 项目不参与主包部署
+      console.log('子项目开始部署', projectPath)
+
       if (!fs.existsSync(`${projectPath}/app/${location}`)) {
         fs.mkdirSync(`${projectPath}/app/${location}`)
         console.log('子项目创建成功')
       } else {
-        const files = fs.readdirSync(`${projectPath}/app/${location}`)
-        files.forEach(file => {
-          const curPath = `${projectPath}/app/${location}/${file}`
-          if (fs.statSync(curPath).isDirectory()) {
-            // recurse
-            fs.rmdirSync(`${projectPath}/app/${location}`)
-            console.log('文件夹')
-          } else {
-            // delete file
-            fs.unlinkSync(curPath, err => {
-              if (err) throw err
-            })
-          }
+        await remove(`${projectPath}/app/${location}`).catch(err => {
+          throw new Error(err)
         })
       }
 
       try {
         fs.renameSync(`${filePath}/${folder}`, `${projectPath}/app/${location}`)
+        console.log('子项目部署完成')
       } catch (err) {
         // TODO 完善已存在的情况
         console.warn('目标子项目已存在，将被覆盖')
@@ -97,8 +102,6 @@ class DeployService extends Service {
     proxy = '',
     nginxPath = ''
   ) {
-    // TODO https（ssl）配置支持
-
     try {
       const config = ncp.queryFromString(fs.readFileSync(nginxPath, 'utf-8'))
 

@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-13 10:18:42
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-12 18:26:13
+ * @LastEditTime: 2020-12-03 13:27:53
  * @Description: file content
  */
 
@@ -12,30 +12,10 @@ const YAML = require('yamljs')
 const fs = require('fs-extra')
 const path = require('path')
 const ncp = require('nginx-config-parser')
-const childProcess = require('child_process')
 
 const Service = require('egg').Service
 
-// 开启子进程来执行 node 命令
-function run(cmd, args, fn) {
-  args = args || []
-  const runner = childProcess.spawn(cmd, args, {
-    detached: true,
-    stdio: 'inherit',
-  })
-
-  runner.on('error', err => {
-    console.log('Failed to start child process')
-    throw new Error(err)
-  })
-
-  runner.on('close', code => {
-    if (fn) {
-      fn(code)
-    }
-  })
-}
-
+// 项目操作模块
 class ProjectService extends Service {
   async createNewSolutions(name) {
     const targetPath = path.resolve(__dirname, `../public/workspace/${name}`)
@@ -132,6 +112,8 @@ class ProjectService extends Service {
   }
 
   async packProject(solutions, name, tag) {
+    const { ctx } = this
+
     const filePath = path.resolve(
       __dirname,
       `../public/workspace/${solutions}/${name}/config.yml`
@@ -157,9 +139,8 @@ class ProjectService extends Service {
 
       process.chdir(projectPath)
 
-      run(
-        'docker',
-        [
+      await ctx
+        .runCommandWithSpawn('docker', [
           'image',
           'build',
           '-f',
@@ -167,20 +148,17 @@ class ProjectService extends Service {
           '-t',
           `${imagename}:${tag}`,
           '.',
-        ],
-        () => {
-          // childProcess.spawn(
-          //   'docker',
-          //   ['save', '-o', `${imagename}.tar`, `${imagename}:${tag}`],
-          //   {
-          //     detached: true,
-          //     stdio: 'inherit',
-          //   }
-          // )
-          console.log('docker pack complete')
-          return true
-        }
-      )
+        ])
+        .catch(err => console.error(err))
+
+      console.log('镜像构建完成，开始推送')
+
+      await ctx
+        .runCommandWithSpawn('docker', ['push', `${imagename}:${tag}`])
+        .catch(err => console.error(err))
+
+      console.log('镜像推送完成')
+      return true
     } catch (err) {
       throw new Error(err)
     }

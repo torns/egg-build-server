@@ -9,11 +9,11 @@
   "dependencies": {
     "compressing": "^1.5.1",
     "download-git-repo": "^3.0.2",
-    "egg": "^2.15.1",
+    "egg": "^2.29.1",
     "egg-amqplib": "^2.0.5",
     "egg-cors": "^2.2.3",
     "egg-redis": "^2.4.0",
-    "egg-scripts": "^2.11.0",
+    "egg-scripts": "^2.13.0",
     "egg-snowflake": "^1.2.0",
     "egg-validate": "^2.0.2",
     "fs-extra": "^9.0.1",
@@ -25,21 +25,23 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "autod": "^3.0.1",
+    "autod": "^3.1.1",
     "autod-egg": "^1.1.0",
     "cross-env": "^7.0.3",
     "egg-bin": "^4.11.0",
-    "egg-ci": "^1.11.0",
+    "egg-ci": "^1.18.0",
     "egg-mock": "^3.21.0",
     "eslint": "^5.13.0",
-    "eslint-config-egg": "^7.1.0"
+    "eslint-config-egg": "^7.1.0",
+    "pm2": "^4.5.0"
   },
   "engines": {
     "node": ">=10.0.0"
   },
   "scripts": {
     "start": "egg-scripts start --daemon --title=egg-server-build-server",
-    "start:front": "egg-scripts start --title=egg-server-build-server",
+    "start:single": "egg-scripts start --workers=1 --title=egg-server-build-server",
+    "start:front": "pm2 start server.js --no-daemon",
     "stop": "egg-scripts stop --title=egg-server-build-server",
     "dev": "egg-bin dev",
     "local": "egg-bin dev",

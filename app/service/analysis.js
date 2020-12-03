@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-18 11:00:16
+ * @LastEditTime: 2020-12-03 13:35:45
  * @Description: file content
  */
 
@@ -13,22 +13,28 @@ const fs = require('fs-extra')
 
 const Service = require('egg').Service
 
+// 配置文件分析模块
 class AnalysisService extends Service {
   async getProjectConfig(solutions, path) {
     return new Promise((resolve, reject) => {
       try {
         if (fs.existsSync(`${path}/build.yml`)) {
           const file = fs.readFileSync(`${path}/build.yml`).toString()
-          if (!file) reject(new Error('项目内配置文件不能为空'))
+
+          if (!file) {
+            reject(new Error('项目内配置文件不能为空'))
+          }
 
           const data = YAML.parse(file)
-          console.log(data[solutions])
-          resolve(data[solutions])
-        } else {
-          reject(new Error('项目内配置文件不存在'))
+
+          if (data[solutions]) {
+            return resolve(data[solutions])
+          }
+          return reject(new Error('配置文件格式错误'))
         }
+        return reject(new Error('项目内配置文件不存在'))
       } catch (err) {
-        reject(err)
+        return reject(err)
       }
     })
   }

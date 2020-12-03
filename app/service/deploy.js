@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-12-02 18:37:09
+ * @LastEditTime: 2020-12-03 13:01:44
  * @Description: file content
  */
 
@@ -27,9 +27,11 @@ function remove(path) {
   })
 }
 
+// 项目部署模块
 class DeployService extends Service {
   async index(solutions, path) {
     const { ctx } = this
+
     return new Promise(async (resolve, reject) => {
       const config = await ctx.service.analysis
         .getProjectConfig(solutions, path)

@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-18 11:41:57
+ * @LastEditTime: 2020-12-03 11:15:21
  * @Description: file content
  */
 
@@ -17,22 +17,53 @@ const childProcess = require('child_process')
 const Service = require('egg').Service
 
 // 开启子进程来执行 node 命令
-function run(cmd, args, fn) {
-  args = args || []
-  childProcess.execFile(
-    cmd,
-    args,
-    { timeout: 300000, maxBuffer: 4096 * 1024 },
-    (error, stdout) => {
-      if (error) {
-        console.error(error)
+// function run(cmd, args, cwd) {
+//   return new Promise((resolve, reject) => {
+//     args = args || []
+//     childProcess.execFile(
+//       cmd,
+//       args,
+//       {
+//         cwd,
+//         timeout: 300000,
+//         maxBuffer: 4096 * 1024,
+//         shell: true,
+//       },
+//       (error, stdout, stderr) => {
+//         if (error) {
+//           console.error(error)
+//           return reject(error)
+//           // TODO 继续构建
+//         }
+//         console.log(stdout)
+//         console.log(stderr)
+//         return resolve('ok')
+//       }
+//     )
+//   })
+// }
+
+function run(cmd, cwd, env = {}) {
+  return new Promise(resolve => {
+    childProcess.exec(
+      cmd,
+      {
+        cwd,
+        timeout: 300000,
+        maxBuffer: 4096 * 1024,
+        env: Object.assign({}, process.env, env),
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(error)
+          // TODO 继续构建
+        }
+        console.log(stdout)
+        console.log(stderr)
+        return resolve('ok')
       }
-      console.log(stdout)
-      if (fn) {
-        fn()
-      }
-    }
-  )
+    )
+  })
 }
 
 class EstablishService extends Service {
@@ -60,7 +91,7 @@ class EstablishService extends Service {
         // eslint-disable-next-line no-extra-boolean-cast
         if (Boolean(config.config.ssr)) {
           // ssr 项目不参与主包构建
-          console.log('ssr 项目')
+          console.log('当前为 SSR 项目')
           await this.afterBuild(solutions, `${path}/${item}`).catch(err => {
             console.error(err)
           })
@@ -71,30 +102,44 @@ class EstablishService extends Service {
 
         process.chdir(`${path}/${item}`)
 
-        run(which.sync(npm), ['install'], () => {
-          console.log('install complete')
-          console.log(`构建命令:${command}`)
-          try {
-            run(
-              which.sync(npm),
-              npm === 'yarn' ? [command] : ['run', command],
-              async () => {
-                console.log('build complete')
-                await this.afterBuild(solutions, `${path}/${item}`).catch(
-                  err => {
-                    console.error(err)
-                  }
-                ) // 当前 path 为 temp/...
-                resolve('ok')
-              }
-            )
-          } catch (err) {
-            console.error(`应用构建异常：${err}，请重新尝试`)
+        // await run(which.sync(npm), ['install'], `${path}/${item}`).catch(
+        //   err => {
+        //     console.error(`应用安装依赖异常：${err}，请重新尝试`)
+        //     this.clearTemp()
+        //       .then(() => reject(new Error(err)))
+        //       .catch(e => reject(new Error(`${err} & ${e}`)))
+        //   }
+        // )
+        console.log('开始安装依赖')
+
+        await run(`${which.sync(npm)} install`, `${path}/${item}`).catch(
+          err => {
+            console.error(`依赖安装异常：${err}，请重新尝试`)
             this.clearTemp()
               .then(() => reject(new Error(err)))
               .catch(e => reject(new Error(`${err} & ${e}`)))
           }
+        )
+
+        console.log('依赖安装完成')
+        console.log('\n')
+        console.log(`开始项目构建，当前构建命令:${command}`)
+
+        await run(`${which.sync(npm)} run ${command}`, `${path}/${item}`, {
+          NODE_ENV: 'production',
+        }).catch(err => {
+          console.error(`项目构建异常：${err}，请重新尝试`)
+          this.clearTemp()
+            .then(() => reject(new Error(err)))
+            .catch(e => reject(new Error(`${err} & ${e}`)))
         })
+
+        console.log('项目构建完成')
+
+        await this.afterBuild(solutions, `${path}/${item}`).catch(err => {
+          console.error(err)
+        })
+        return resolve('ok')
       })
     })
   }
@@ -121,11 +166,9 @@ class EstablishService extends Service {
         process.chdir(finalPath)
         rimraf(`${finalPath}/temp`, err => {
           if (err) console.log(err)
-          console.log('clear temp area complete')
+          console.log('临时空间清空完成')
 
           fs.mkdirSync(`${finalPath}/temp`)
-
-          console.log('rebuild temp area complete')
           resolve('ok')
         })
         // run('rm', ['-r', '-f', 'temp'], () => {

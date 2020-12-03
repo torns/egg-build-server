@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 11:35:45
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-15 18:44:00
+ * @LastEditTime: 2020-12-03 00:04:37
  * @Description: file content
  */
 /* eslint valid-jsdoc: "off" */
@@ -59,28 +59,6 @@ module.exports = appInfo => {
         password: 'whz18267590821',
         db: 0,
         weakDependent: true,
-      },
-    },
-    amqplib: {
-      client: {
-        // url: 'amqp://localhost',
-        connectOptions: {
-          protocol: 'amqp',
-          hostname: 'localhost',
-          port: 5672,
-          username: 'guest',
-          password: 'guest',
-          locale: 'en_US',
-          frameMax: 0,
-          heartbeat: 0,
-          vhost: '/',
-        },
-        // socketOptions: {
-        //   cert: certificateAsBuffer, // client cert
-        //   key: privateKeyAsBuffer, // client key
-        //   passphrase: 'MySecretPassword', // passphrase for key
-        //   ca: [caCertAsBuffer], // array of trusted CA certs
-        // },
       },
     },
   }

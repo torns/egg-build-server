@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:48
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-11-18 15:10:50
+ * @LastEditTime: 2020-12-02 18:37:09
  * @Description: file content
  */
 
@@ -37,61 +37,75 @@ class DeployService extends Service {
           console.error(err)
           reject(err)
         })
-      this.deployProject(solutions, path, config)
+      await this.deployProject(solutions, path, config).catch(err => {
+        console.error(err)
+        reject(err)
+      })
       resolve(config)
     })
   }
 
   async deployProject(solutions, filePath, yamlData) {
-    const project = yamlData.target.project
-    const location = yamlData.target.location
-    const server = yamlData.target.server
-    const spa = Boolean(yamlData.config.spa)
-    const ssr = Boolean(yamlData.config.ssr)
-    const folder = yamlData.config.folder || 'dist'
-    const proxy = yamlData.config.proxy || ''
+    return new Promise(async (resolve, reject) => {
+      const project = yamlData.target.project
+      const location = yamlData.target.location
+      const server = yamlData.target.server
+      const spa = Boolean(yamlData.config.spa)
+      const ssr = Boolean(yamlData.config.ssr)
+      const folder = yamlData.config.folder || 'dist'
+      const proxy = yamlData.config.proxy || ''
 
-    const projectPath = path.resolve(
-      __dirname,
-      `../public/workspace/${solutions}/${project}`
-    )
-    // 统一为先创建项目
-    // if (!fs.existsSync(projectPath)) {
-    //   fs.mkdirSync(projectPath)
-    //   fs.copyFileSync(NGINX_LOCATION, `${projectPath}/nginx.conf`)
-    //   console.log('项目创建成功')
-    // }
-    if (!ssr) {
-      // ssr 项目不参与主包部署
-      console.log('子项目开始部署', projectPath)
+      const projectPath = path.resolve(
+        __dirname,
+        `../public/workspace/${solutions}/${project}`
+      )
+      // 统一为先创建项目
+      // if (!fs.existsSync(projectPath)) {
+      //   fs.mkdirSync(projectPath)
+      //   fs.copyFileSync(NGINX_LOCATION, `${projectPath}/nginx.conf`)
+      //   console.log('项目创建成功')
+      // }
+      if (!ssr) {
+        // ssr 项目不参与主包部署
+        console.log('子项目开始部署', projectPath)
 
-      if (!fs.existsSync(`${projectPath}/app/${location}`)) {
-        fs.mkdirSync(`${projectPath}/app/${location}`)
-        console.log('子项目创建成功')
-      } else {
-        await remove(`${projectPath}/app/${location}`).catch(err => {
-          throw new Error(err)
-        })
+        if (!fs.existsSync(`${projectPath}/app/${location}`)) {
+          fs.mkdirSync(`${projectPath}/app/${location}`)
+          console.log('子项目创建成功')
+        } else {
+          await remove(`${projectPath}/app/${location}`).catch(err => {
+            console.error(
+              `${projectPath}/app/${location}，子项目目录移除失败`,
+              err
+            )
+            return reject(err)
+          })
+          fs.mkdirSync(`${projectPath}/app/${location}`)
+          console.log('子项目已被覆盖')
+        }
+
+        try {
+          fs.renameSync(
+            `${filePath}/${folder}`,
+            `${projectPath}/app/${location}`
+          )
+          console.log('子项目部署完成')
+        } catch (err) {
+          console.error(err)
+          return reject(err)
+        }
       }
 
-      try {
-        fs.renameSync(`${filePath}/${folder}`, `${projectPath}/app/${location}`)
-        console.log('子项目部署完成')
-      } catch (err) {
-        // TODO 完善已存在的情况
-        console.warn('目标子项目已存在，将被覆盖')
-        throw new Error(err)
-      }
-    }
-
-    this.addNginxLocation(
-      server,
-      location,
-      spa,
-      ssr,
-      proxy,
-      `${projectPath}/nginx.conf`
-    )
+      this.addNginxLocation(
+        server,
+        location,
+        spa,
+        ssr,
+        proxy,
+        `${projectPath}/nginx.conf`
+      )
+      return resolve()
+    })
   }
 
   async addNginxLocation(

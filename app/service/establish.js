@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-10 20:05:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-12-03 16:40:19
+ * @LastEditTime: 2021-02-21 10:19:45
  * @Description: file content
  */
 
@@ -63,7 +63,7 @@ class EstablishService extends Service {
         try {
           // await ctx.runCommandWithSpawn(npm, ['install'], true)
           await ctx.runCommandWithExec(
-            `${npm} install --force`,
+            `sudo ${npm} install`,
             `${path}/${item}`
           )
         } catch (err) {
@@ -73,12 +73,19 @@ class EstablishService extends Service {
             status: false,
             step: 'install',
           })
-          await this.clearTemp()
+          await ctx.clearTemp()
           return reject(new Error(err))
         }
 
         console.log('依赖安装完成')
         console.log('\n')
+
+        // console.log('更新 uploader 模块\n')
+        // await ctx.runCommandWithExec(
+        //   `sudo ${npm} add @gdyfe/uploader@2.1.6 --exact`,
+        //   `${path}/${item}`
+        // )
+
         console.log(`开始项目构建，当前构建命令:${command}`)
 
         try {
